@@ -2,6 +2,8 @@ name: CD
 on:
   push:
     branches: [ main ]
+    tags:
+      - 'v*'
 
 jobs:
   docker-deploy:
@@ -23,3 +25,9 @@ jobs:
         TS=$(date +%Y-%m-%d-%H-%M-%S)
         docker tag $IMAGE:latest $IMAGE:$TS
         docker push $IMAGE:$TS
+        # Wersjonowanie wg tagów gita (jeśli tag)
+        if [[ ${{ github.ref }} == refs/tags/* ]]; then
+          VERSION="${{ github.ref_name }}"
+          docker tag $IMAGE:latest $IMAGE:$VERSION
+          docker push $IMAGE:$VERSION
+        fi
